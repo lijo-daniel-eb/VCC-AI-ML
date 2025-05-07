@@ -1,0 +1,9 @@
+pymongo
+sentence-transformers
+chromadb
+langchain
+transformers
+torch
+pyodbc
+scikit-learn
+langchain-community
