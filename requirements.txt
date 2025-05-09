@@ -9,3 +9,4 @@ scikit-learn
 langchain-community
 langchain-huggingface
 langchain-chroma
+tiktoken

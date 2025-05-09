@@ -18,7 +18,7 @@ model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')  # You can
 client = MongoClient("mongodb://localhost:27017/")
 db = client["VJournal"]
 collection = db["AuditLog"]
-documents = list(collection.find())
+documents = list(collection.find().limit(300))  # Fetch only the top 500 records from the MongoDB collection
 
 # Generate embeddings for each document
 for doc in documents:
