@@ -7,3 +7,5 @@ torch
 pyodbc
 scikit-learn
 langchain-community
+langchain-huggingface
+langchain-chroma

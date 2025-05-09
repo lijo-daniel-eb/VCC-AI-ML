@@ -1,49 +1,55 @@
-
-from chromadb.config import Settings
-from langchain.vectorstores import Chroma
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.llms import LlamaCpp  # For local LLM
-from langchain.chains import RetrievalQA
+import os
+from huggingface_hub import snapshot_download
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+from langchain_chroma import Chroma
+from langchain_community.llms import Ollama
+from langchain.chains.retrieval_qa.base import RetrievalQA
 from langchain.prompts import PromptTemplate
-from langchain.schema import Document
-from langchain.llms import Ollama
-import chromadb
+from chromadb import Client
+# Define model info
+model_name = 'sentence-transformers/all-MiniLM-L6-v2'
+local_model_path = "C:\\LLM_Model\\all-MiniLM-L6-v2"  # Change this to your preferred local path
 
-# 1. Initialize the embedding model
-embeddings = HuggingFaceEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
+# Check if model exists locally, if not download it
+def ensure_model_is_local(model_name, local_path):
+    if not os.path.exists(local_path) or len(os.listdir(local_path)) == 0:
+        print(f"Model not found locally. Downloading {model_name} to {local_path}...")
+        snapshot_download(
+            repo_id=model_name,
+            local_dir=local_path
+        )
+        print(f"Model downloaded successfully to {local_path}")
+    else:
+        print(f"Using cached model at {local_path}")
+    return local_path
 
-# 2. Connect to your existing ChromaDB collection
-client = chromadb.Client(Settings(persist_directory="C:\\ChromaDb"))
-# Option 1: List existing collections and use one if it exists
-existing_collections = client.list_collections()
-existing_collection = client.get_collection(name="chroma_collection")
+# Ensure model is available locally
+local_model_path = ensure_model_is_local(model_name, local_model_path)
 
-# 3. Get all documents from your existing collection
-raw_docs = existing_collection.get(include=["documents", "metadatas", "embeddings"])
+# 1. Initialize the embedding model. Use the local model path for embeddings
+# embeddings = HuggingFaceEmbeddings(model_name=local_model_path)
 
-# 4. Convert to LangChain documents
-documents = []
-for i, doc_text in enumerate(raw_docs["documents"]):
-    metadata = raw_docs["metadatas"][i] if i < len(raw_docs["metadatas"]) else {}
-    documents.append(Document(page_content=doc_text, metadata=metadata))
 
-# 5. Create a LangChain Chroma wrapper that points to the existing collection
+# 2. Create a LangChain Chroma wrapper that points to the existing collection
+# This directly connects to your existing ChromaDB collection
+
 vectorstore = Chroma(
-    collection_name="collection",
-    embedding_function=embeddings,
-    persist_directory="C:\\ChromaDb"
+    collection_name="AuditLog",  
+    persist_directory="C:\\ChromaDb",
+    # embedding_function=embeddings,
+    client_settings={"_type": "chroma"} 
 )
 
-# 6. Initialize the local LLM (adjust path and parameters to your model)
+# 3. Initialize the local LLM
 llm = Ollama(
-    model="llama3",  # Update with your model path
+    model="llama3",
     temperature=0.1,
     max_tokens=2000,
-    n_ctx=4096,  # Adjust context window size based on your model
+    context_window=4096,  # Updated from n_ctx to context_window
     top_p=1
 )
 
-# 7. Create a custom prompt template for RAG
+# 4. Create a custom prompt template for RAG
 prompt_template = """
 Answer the question based only on the following context:
 
@@ -51,15 +57,14 @@ Answer the question based only on the following context:
 
 Question: {question}
 
-Answer:
-"""
+Answer: """
 
 PROMPT = PromptTemplate(
     template=prompt_template,
     input_variables=["context", "question"]
 )
 
-# 8. Create the RAG pipeline
+# 5. Create the RAG pipeline
 rag_chain = RetrievalQA.from_chain_type(
     llm=llm,
     chain_type="stuff",  # Options: "stuff", "map_reduce", "refine"
@@ -71,7 +76,7 @@ rag_chain = RetrievalQA.from_chain_type(
     return_source_documents=True  # Return the source documents with the answer
 )
 
-# 9. Function to query the RAG system
+# 6. Function to query the RAG system
 def answer_question(question):
     """
     Query the RAG system with a question
@@ -82,22 +87,39 @@ def answer_question(question):
     Returns:
         Dictionary with answer and source documents
     """
-    result = rag_chain({"query": question})
+    result = rag_chain.invoke({"query": question})  # Changed from call to invoke
     
     # Extract answer and sources
-    answer = result["result"]
-    sources = result["source_documents"]
+    answer = result.get("result", "")  # Using get() with default value
+    sources = result.get("source_documents", [])  # Using get() with default value
     
     # Print results
-    print(f"Question: {question}")
-    print(f"Answer: {answer}")
+    print(f"\nQuestion: {question}")
+    print(f"\nAnswer: {answer}")
     print("\nSources:")
     for i, doc in enumerate(sources):
         print(f"Source {i+1}: {doc.page_content[:150]}...")
-        print(f"Metadata: {doc.metadata}\n")
+        if hasattr(doc, 'metadata') and doc.metadata:
+            print(f"Metadata: {doc.metadata}\n")
     
     return result
 
-# Example usage
-question = "What information do you have about X?"  # Replace with actual question
-response = answer_question(question)
+# 7. Run in a loop to allow multiple questions
+def main():
+    print("RAG Question-Answering System")
+    print("Type 'exit', 'quit', or 'q' to end the session")
+    
+    while True:
+        # Get question from user input
+        question = input("\nEnter your question: ")
+        
+        # Check if user wants to exit
+        if question.lower() in ['exit', 'quit', 'q']:
+            print("Exiting the program. Goodbye!")
+            break
+            
+        # Process the question
+        response = answer_question(question)
+
+if __name__ == "__main__":
+    main()

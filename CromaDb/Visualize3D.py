@@ -9,7 +9,7 @@ def visualize_embeddings_2d():
     chroma_client = chromadb.PersistentClient(path="C:\\ChromaDb")
 
     # Get the collection
-    chroma_collection = chroma_client.get_or_create_collection(name="chroma_collection")
+    chroma_collection = chroma_client.get_or_create_collection(name="AuditLog")
 
     # Retrieve all embeddings and their metadata
     embeddings = []
