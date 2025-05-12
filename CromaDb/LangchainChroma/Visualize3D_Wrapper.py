@@ -6,12 +6,14 @@ from langchain.vectorstores import Chroma
 
 def visualize_embeddings_2d():
     # Initialize ChromaDB client
+    collectionName = "AuditLog"
     persist_directory = "C:\\ChromaDbLangchain"
     embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
     chroma_client = Chroma(
         persist_directory=persist_directory,
         embedding_function=embedding_function,
+        collection_name=collectionName
     )
 
     # To get total count, request just the IDs (most efficient)
@@ -55,3 +57,4 @@ def visualize_embeddings_2d():
 
 if __name__ == "__main__":
     visualize_embeddings_2d()
+    input("Press Enter to continue...")

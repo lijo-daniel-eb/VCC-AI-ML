@@ -3,9 +3,10 @@ from langchain_chroma import Chroma
 from langchain.schema import Document
 from langchain.embeddings import SentenceTransformerEmbeddings
 
+collectionName = "AuditLog"
 client = MongoClient("mongodb://localhost:27017/")
 db = client["VJournal"]
-collection = db["AuditLog"]
+collection = db[collectionName]
 
 # Transform MongoDB documents into the required format
 documents = [
@@ -19,7 +20,7 @@ documents = [
 embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") 
 
 # Embed the document chunks and store them in ChromaDB
-db = Chroma.from_documents(documents, embedding=embedding_model, persist_directory="C:\ChromaDbLangchain")
+db = Chroma.from_documents(documents,collection_name=collectionName, embedding=embedding_model, persist_directory="C:\ChromaDbLangchain")
 
 
 query = "Find records where AlertTitle is Security!Shooting: Shooting and RiskEventType"
