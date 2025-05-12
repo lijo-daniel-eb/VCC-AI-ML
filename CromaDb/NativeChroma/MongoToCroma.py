@@ -1,5 +1,6 @@
 from pymongo import MongoClient
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 import chromadb
 
 # Initialize ChromaDB client - In memory mode
@@ -13,19 +14,19 @@ chroma_client = chromadb.PersistentClient(path="C:\\ChromaDb")
 chroma_Collection = chroma_client.get_or_create_collection(name="AuditLog")
 
 # Load a local pre-trained model for embeddings
-model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')  # You can choose other models from Hugging Face
+embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")  # You can choose other models from Hugging Face
 
 client = MongoClient("mongodb://localhost:27017/")
 db = client["VJournal"]
 collection = db["AuditLog"]
-documents = list(collection.find().limit(300))  # Fetch only the top 500 records from the MongoDB collection
+documents = list(collection.find())  # Fetch only the top 500 records from the MongoDB collection
 
 # Generate embeddings for each document
 for doc in documents:
     content = f"{doc.get('AlertTitle', '')} {doc.get('ActionTaken', '')} {doc.get('RiskEventSource', '')}  {doc.get('RiskEventType', '')} {doc.get('RiskEventCategory', '')} {doc.get('RiskEventStatus', '')} {doc.get('RiskEventStartTime', '')}"
     if content:
         # Generate embedding locally
-        embedding = model.encode(content).tolist()
+        embedding = embedding_model.embed_query(content)
         # Add document and embedding to ChromaDB
         chroma_Collection.add(
             documents=[content],  # The content of the document

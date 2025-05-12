@@ -6,7 +6,7 @@ import chromadb
 
 def visualize_embeddings_2d():
     # Initialize ChromaDB client
-    chroma_client = chromadb.PersistentClient(path="C:\\ChromaDb")
+    chroma_client = chromadb.PersistentClient(path="C:\\ChromaDbL")
 
     # Get the collection
     chroma_collection = chroma_client.get_or_create_collection(name="AuditLog")

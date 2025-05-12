@@ -1,6 +1,6 @@
 from chromadb.config import Settings
 import chromadb
-from sentence_transformers import SentenceTransformer
+from langchain_community.embeddings import SentenceTransformerEmbeddings
 
 chroma_client = chromadb.PersistentClient(path="C:\\ChromaDb")
 
@@ -15,10 +15,10 @@ chroma_Collection = chroma_client.get_or_create_collection(name="AuditLog")
 # results = fetch_audit_log_records()
 
 # Initialize a sentence transformer model
-model = SentenceTransformer('all-MiniLM-L6-v2')
+embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") 
 
 query = "Security!Shooting"
-query_embedding = model.encode([query]).tolist()
+query_embedding = embedding_model.embed_query(query)
 results = chroma_Collection.query(
  query_embeddings=query_embedding,
  n_results=20
