@@ -50,7 +50,7 @@ ollama_llm = Ollama(
 # 4. Create a retriever from the vector store
 retriever = vectorstore.as_retriever(
     search_type="similarity", 
-    search_kwargs={"k": 10}
+    search_kwargs={"k": 500}
 )
 
 # 5. Create a RAG chain with the Ollama LLM
@@ -60,9 +60,6 @@ qa_chain = RetrievalQA.from_chain_type(
     retriever=retriever,
     return_source_documents=True  # To see which documents were used
 )
-
-# 6. Run a query through the RAG system
-query = "display all records where Risk Event Source is Local PD occured on 2nd Feb 2025"
 
 # 11. For better prompting with Ollama models, you might want to customize the prompt template
 from langchain.prompts import PromptTemplate
@@ -85,7 +82,7 @@ PROMPT = PromptTemplate(
     input_variables=["context", "question"]
 )
 
-# Create a chain with the custom prompt
+# Ensure qa_chain_custom_prompt is initialized before the loop
 qa_chain_custom_prompt = RetrievalQA.from_chain_type(
     llm=ollama_llm,
     chain_type="stuff",
@@ -94,5 +91,20 @@ qa_chain_custom_prompt = RetrievalQA.from_chain_type(
     chain_type_kwargs={"prompt": PROMPT}
 )
 
-result_custom = qa_chain_custom_prompt({"query": query})
-print(f"Answer with custom prompt: {result_custom['result']}")
+# Replace the static query with a user input loop
+while True:
+    query = input("Enter your query (or type 'exit' to quit): ")
+    if query.lower() == 'exit':
+        print("Exiting the application.")
+        break
+
+    # Run the query through the RAG system
+    result_custom = qa_chain_custom_prompt({"query": query})
+    print(f"Answer with custom prompt: {result_custom['result']}")
+
+    # Display source documents
+    print("Source documents:")
+    for i, doc in enumerate(result_custom['source_documents']):
+        print(f"Document {i+1}: {doc.page_content}")
+        print(f"Metadata: {doc.metadata}")
+        print("---")
