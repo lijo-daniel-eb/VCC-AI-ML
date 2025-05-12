@@ -35,7 +35,6 @@ embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2"
 # This directly connects to your existing ChromaDB collection
 
 vectorstore = Chroma(
-    collection_name="AuditLog", 
     persist_directory=persist_directory,
     embedding_function=embedding_function
 )
@@ -51,7 +50,7 @@ ollama_llm = Ollama(
 # 4. Create a retriever from the vector store
 retriever = vectorstore.as_retriever(
     search_type="similarity", 
-    search_kwargs={"k": 4}
+    search_kwargs={"k": 10}
 )
 
 # 5. Create a RAG chain with the Ollama LLM
@@ -63,38 +62,7 @@ qa_chain = RetrievalQA.from_chain_type(
 )
 
 # 6. Run a query through the RAG system
-query = "Risk Event Source as Local PD"
-result = qa_chain({"query": query})
-print(f"Answer: {result['result']}")
-print("Source documents:")
-for i, doc in enumerate(result['source_documents']):
-    print(f"Document {i+1}: {doc.page_content[:100]}...")
-    print(f"Metadata: {doc.metadata}")
-    print("---")
-
-# 7. Advanced retrieval with MMR for more diverse results
-mmr_retriever = vectorstore.as_retriever(
-    search_type="mmr",
-    search_kwargs={"k": 4, "fetch_k": 10, "lambda_mult": 0.7}
-)
-
-qa_chain_mmr = RetrievalQA.from_chain_type(
-    llm=ollama_llm,
-    chain_type="stuff",
-    retriever=mmr_retriever,
-    return_source_documents=True
-)
-
-# 8. Using metadata filters if your documents have metadata
-metadata_filter = {"category": "important"}
-filtered_retriever = vectorstore.as_retriever(
-    search_kwargs={"k": 4, "filter": metadata_filter}
-)
-
-# 10. Get all documents from the collection if needed
-collection = vectorstore._collection
-all_results = collection.get()
-print(f"Total documents in collection: {len(all_results['documents'])}")
+query = "display all records where Risk Event Source is Local PD occured on 2nd Feb 2025"
 
 # 11. For better prompting with Ollama models, you might want to customize the prompt template
 from langchain.prompts import PromptTemplate
