@@ -11,7 +11,7 @@ collection = db[collectionName]
 # Transform MongoDB documents into the required format
 documents = [
     Document(
-        page_content = f"{doc.get('AlertTitle', '')} {doc.get('ActionTaken', '')} {doc.get('RiskEventSource', '')}  {doc.get('RiskEventType', '')} {doc.get('RiskEventCategory', '')} {doc.get('RiskEventStatus', '')} {doc.get('RiskEventStartTime', '')}"
+        page_content = f"AlertCreatedTime: {doc.get('AlertCreatedTime', '')} AlertTitle: {doc.get('AlertTitle', '')} ActionTaken: {doc.get('ActionTaken', '')} RiskEventSource: {doc.get('RiskEventSource', '')}  RiskEventType: {doc.get('RiskEventType', '')} RiskEventCategory: {doc.get('RiskEventCategory', '')} RiskEventStatus: {doc.get('RiskEventStatus', '')} RiskEventStartTime: {doc.get('RiskEventStartTime', '')} RiskEventEndTime: {doc.get('RiskEventEndTime', '')} RiskEventPublishedTime: {doc.get('RiskEventPublishedTime', '')}"
     )
     for doc in collection.find().limit(150)
 ]

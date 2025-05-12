@@ -48,39 +48,6 @@ ollama_llm = Ollama(
 )
 
 
-# 4. Create a retriever from the vector store
-retriever = vectorstore.as_retriever(
-    search_type="similarity", 
-    search_kwargs={"k": 20}
-)
-
-# 5. Create a RAG chain with the Ollama LLM
-qa_chain = RetrievalQA.from_chain_type(
-    llm=ollama_llm,
-    chain_type="stuff",  # Simple document compilation
-    retriever=retriever,
-    return_source_documents=True  # To see which documents were used
-)
-
-# Replace the static query with a user input loop
-while True:
-    query = input("Enter your query (or type 'exit' to quit): ")
-    if query.lower() == 'exit':
-        print("Exiting the application.")
-        break
-
-    # Run the query through the RAG system
-    result = qa_chain({"query": query})
-    print(f"Answer: {result['result']}")
-
-    # Display source documents
-    # print("Source documents:")
-    # for i, doc in enumerate(result['source_documents']):
-    #     print(f"Document {i+1}: {doc.page_content[:100]}...")
-    #     print(f"Metadata: {doc.metadata}")
-    #     print("---")
-
-
 # 7. Advanced retrieval with MMR for more diverse results
 mmr_retriever = vectorstore.as_retriever(
     search_type="mmr",
@@ -94,14 +61,21 @@ qa_chain_mmr = RetrievalQA.from_chain_type(
     return_source_documents=True
 )
 
-# 8. Using metadata filters if your documents have metadata
-metadata_filter = {"category": "important"}
-filtered_retriever = vectorstore.as_retriever(
-    search_kwargs={"k": 20, "filter": metadata_filter}
-)
-
 # 10. Get all documents from the collection if needed
-collection = vectorstore._collection
-all_results = collection.get()
-print(f"Total documents in collection: {len(all_results['documents'])}")
+# collection = vectorstore._collection
+# all_results = collection.get()
+# print(f"Total documents in collection: {len(all_results['documents'])}")
+
+# Add an option to use filtered_retriever in the query loop
+while True:
+    query = input("Enter your query (or type 'exit' to quit): ")
+    if query.lower() == 'exit':
+        print("Exiting the application.")
+        break
+
+    result = qa_chain_mmr({"query": query})
+
+print(f"Answer: {result['result']}")
+
+
 
