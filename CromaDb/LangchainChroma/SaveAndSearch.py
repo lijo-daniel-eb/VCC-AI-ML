@@ -2,18 +2,35 @@ from pymongo import MongoClient
 from langchain_chroma import Chroma
 from langchain.schema import Document
 from langchain.embeddings import SentenceTransformerEmbeddings
+import json
+import os
 
 collectionName = "AuditLog"
 client = MongoClient("mongodb://localhost:27017/")
 db = client["VJournal"]
 collection = db[collectionName]
 
+# Use the file from the current working directory
+template_file = os.path.join(os.getcwd(), "RiskEventTemplate.json")
+if not os.path.exists(template_file):
+    print(f"File not found: {template_file}")
+with open(template_file, "r") as file:
+    template = json.load(file)
+
 # Transform MongoDB documents into the required format
 documents = [
     Document(
-        page_content = f"AlertCreatedTime: {doc.get('AlertCreatedTime', '')} AlertTitle: {doc.get('AlertTitle', '')} ActionTaken: {doc.get('ActionTaken', '')} RiskEventSource: {doc.get('RiskEventSource', '')}  RiskEventType: {doc.get('RiskEventType', '')} RiskEventCategory: {doc.get('RiskEventCategory', '')} RiskEventStatus: {doc.get('RiskEventStatus', '')} RiskEventStartTime: {doc.get('RiskEventStartTime', '')} RiskEventEndTime: {doc.get('RiskEventEndTime', '')} RiskEventPublishedTime: {doc.get('RiskEventPublishedTime', '')}"
+        page_content=(
+            template["text"].format(
+                **{key: doc.get(key, "") for key in template["text"].split("{") if "}" in key}
+            ) + (
+                " ".join(
+                    f"{prop}: {value}" for prop, value in doc.get("ExtendedPropertiesAccess", {}).items()
+                ) if "ExtendedPropertiesAccess" in doc else ""
+            )
+        )
     )
-    for doc in collection.find().limit(150)
+    for doc in collection.find().limit(10)
 ]
 
 # Load a local pre-trained model for embeddings
