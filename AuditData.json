@@ -1,0 +1,252 @@
+[{
+  "_id": {
+    "$oid": "67eb8eaf768f32396dc58f38"
+  },
+  "ID": {
+    "$binary": {
+      "base64": "olTnWJTmQ+KmCVdhdbolYQ==",
+      "subType": "04"
+    }
+  },
+  "ExternalID": "1124432",
+  "Type": "ISOSAlert",
+  "Title": "Budapest: Expect localised disruption on 1 April during planned protest",
+  "StartTime": [
+    {
+      "$numberLong": "638790624000000000"
+    },
+    0
+  ],
+  "EndTime": [
+    {
+      "$numberLong": "638791488000000000"
+    },
+    0
+  ],
+  "PhoneNumber": null,
+  "EmailAddress": null,
+  "Url": null,
+  "ImageUrl": null,
+  "CreatedTime": [
+    {
+      "$numberLong": "638790875346186889"
+    },
+    0
+  ],
+  "UpdatedTime": null,
+  "ExtendedPropertiesAccess": {
+    "Tags": "Travel disruption | Protests, rallies and associated violence",
+    "Country": "Hungary",
+    "EvacuationLevel": "None",
+    "ImpactArea": "Local",
+    "Minor": {
+      "$numberLong": "0"
+    },
+    "Major": {
+      "$numberLong": "2"
+    },
+    "IsSpecialAdvisory": false
+  },
+  "Geometry": {},
+  "Location": "Local",
+  "Description": "<p><b><i>Level</i></b>: Notice <br>\n<b><i>Location</i></b>: <b>Budapest </b> - Hungary <br>\n<b><i>Category</i></b>: Protest/Rally, Road disruption<br>\n\n<b><i>Event Date</i></b>: 01 Apr 2025</p>\n<p>Expect localised disruption in the capital Budapest on <strong>1 April</strong> during a planned protest. The gathering will be held near <a>Erzsebet Bridge</a> at <strong>17.00</strong> (local time). Demonstrators are denouncing a government ban on Pride events and the use of facial recognition technology against participants. Expect heightened security around the event, which will be well attended and cause traffic disruption in the vicinity. Although the demonstration should pass off peacefully, there is potential for scuffles between participants and the police, posing incidental risks to bystanders.&nbsp;</p>\n\n<p><b>Advice</b></p><ul> <li>Expect localised disruption during the demonstration and plan journeys accordingly.</li> <li>If travelling near the event, reconfirm the status of routes before setting out and allow additional time for journeys.</li> <li>Expect heightened security around the gathering and follow all official directives. Leave the area at the first sign of unrest.</li> <li>Monitor our Hungary alerts for updates.</li>\n</ul>\n\n\n\n\n\n\n\n",
+  "Source": "Intl SOS",
+  "SubSource": null,
+  "Category": "Security",
+  "Subcategory": null,
+  "Status": null,
+  "PublicationTime": [
+    {
+      "$numberLong": "638790645818900000"
+    },
+    0
+  ],
+  "Magnitude": 40233.6,
+  "Severity": null,
+  "QueryGeometry": {},
+  "DisplayLocation": null,
+  "GeoJsonGeometry": {
+    "_t": "MongoDB.Bson.BsonDocument, MongoDB.Bson",
+    "_v": {
+      "type": "Point",
+      "coordinates": [
+        19.0492085288354,
+        47.4909983927536
+      ]
+    }
+  }
+},
+  {
+  "_id": {
+    "$binary": {
+      "base64": "gShv19x+RvKOQKYcQb5v6g==",
+      "subType": "04"
+    }
+  },
+  "_t": "AlertRelatedAuditLogMessage",
+  "User": "Visual Command Center",
+  "ActionTaken": "Acknowledged By System",
+  "CreatedTime": {
+    "$date": "2025-04-01T07:03:45.801Z"
+  },
+  "Files": [],
+  "Errors": [],
+  "AlertId": {
+    "$binary": {
+      "base64": "en8d7txySlqowgAKowwtOw==",
+      "subType": "04"
+    }
+  },
+  "AlertCreatedTime": {
+    "$date": "2025-04-01T06:59:53.300Z"
+  },
+  "AlertTitle": "Security!Shooting: Shooting",
+  "RiskEventSource": "Police/Fire Scanner",
+  "RiskEventType": "NC4RiskEvent",
+  "RiskEventCategory": "Security!Shooting",
+  "RiskEventStatus": "Actual",
+  "RiskEventPublishedTime": {
+    "$date": "2025-01-29T23:35:29.221Z"
+  },
+  "RiskEventStartTime": {
+    "$date": "2025-01-29T23:32:42.990Z"
+  },
+  "RiskEventEndTime": {
+    "$date": "2025-01-30T03:00:16.241Z"
+  },
+  "IsSubscribed": false,
+  "Disposition": "System Expired",
+  "Notes": "Automatically acknowledged by service (unmodified for 1.00:00:00).",
+  "AutoAcknowledgedTime": {
+    "$date": "2025-04-01T07:03:45.803Z"
+  }
+},{
+  "_id": {
+    "$binary": {
+      "base64": "qTBNbTNORs+C9xRt3HMEZQ==",
+      "subType": "04"
+    }
+  },
+  "User": "vccdev1\\lijo.daniel",
+  "ActionTaken": "Note Created",
+  "CreatedTime": {
+    "$date": "2025-03-28T23:58:06.074Z"
+  },
+  "Files": [],
+  "Errors": [],
+  "Title": "Test Note",
+  "Description": "test Note",
+  "Updated": {
+    "$date": "2025-03-28T23:58:06.047Z"
+  },
+  "Created": {
+    "$date": "2025-03-28T23:58:06.047Z"
+  },
+  "Note Details": ""
+},
+{
+  "_id": {
+    "$binary": {
+      "base64": "3KrWOMTORN2DM+fBkYEqKQ==",
+      "subType": "04"
+    }
+  },
+  "User": "vccdev1\\lijo.daniel",
+  "ActionTaken": "Note Updated",
+  "CreatedTime": {
+    "$date": "2025-03-28T23:58:17.701Z"
+  },
+  "Files": [],
+  "Errors": [],
+  "BeforeChange": {
+    "Title": "Test Note",
+    "Description": "test Note",
+    "Updated": {
+      "$date": "2025-03-28T23:58:06.047Z"
+    },
+    "Note Details": ""
+  },
+  "AfterChange": {
+    "Title": "Test Note",
+    "Description": "test Note",
+    "Updated": {
+      "$date": "2025-03-28T23:58:17.697Z"
+    },
+    "Created": {
+      "$date": "2025-03-28T23:58:06.047Z"
+    },
+    "UpdatedBy": "vccdev1\\lijo.daniel",
+    "Note Details": "<p>11</p><p>22</p><p>33</p>"
+  },"ExtendedPropertiesAccess": {
+    "Tags": "Travel disruption | Travel practicalities",
+    "Country": "Samoa",
+    "EvacuationLevel": "None",
+    "ImpactArea": "Country",
+    "ImpactAreaName": "Samoa",
+    "Minor": {
+      "$numberLong": "0"
+    },
+    "Major": {
+      "$numberLong": "1"
+    },
+    "IsSpecialAdvisory": false
+  }
+},{
+  "_id": {
+    "$binary": {
+      "base64": "azFZFmcoRq23zkJkzrcQrA==",
+      "subType": "04"
+    }
+  },
+  "_t": "AlertRelatedAuditLogMessage",
+  "User": "Visual Command Center",
+  "ActionTaken": "Acknowledged By System",
+  "CreatedTime": {
+    "$date": "2025-04-01T07:03:46.161Z"
+  },
+  "Files": [],
+  "Errors": [],
+  "AlertId": {
+    "$binary": {
+      "base64": "AsS2mgXXRrSRPwoqbhUYPQ==",
+      "subType": "04"
+    }
+  },
+  "AlertCreatedTime": {
+    "$date": "2025-04-01T07:01:49.999Z"
+  },
+  "AlertTitle": "Security!Shooting: Shooting",
+  "RiskEventSource": "Other Government",
+  "RiskEventType": "NC4RiskEvent",
+  "RiskEventCategory": "Security!Shooting",
+  "RiskEventStatus": "Actual",
+  "RiskEventPublishedTime": {
+    "$date": "2025-02-05T18:38:46.640Z"
+  },
+  "RiskEventStartTime": {
+    "$date": "2025-02-05T18:34:31.918Z"
+  },
+  "RiskEventEndTime": {
+    "$date": "2025-02-05T21:45:17.759Z"
+  },
+  "IsSubscribed": false,
+  "Disposition": "System Expired",
+  "Notes": "Automatically acknowledged by service (unmodified for 1.00:00:00).",
+  "AutoAcknowledgedTime": {
+    "$date": "2025-04-01T07:03:46.163Z"
+  },
+  "ExtendedPropertiesAccess": {
+    "Tags": "Travel disruption | Travel practicalities | Natural disasters",
+    "Country": "Myanmar | Thailand",
+    "EvacuationLevel": "None",
+    "ImpactArea": "Region",
+    "ImpactAreaName": "Asia & the Pacific",
+    "Minor": {
+      "$numberLong": "0"
+    },
+    "Major": {
+      "$numberLong": "1"
+    },
+    "IsSpecialAdvisory": false
+  }
+}]

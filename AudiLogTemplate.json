@@ -1,0 +1,3 @@
+{
+    "text": "AlertCreatedTime: {AlertCreatedTime} AlertTitle: {AlertTitle} ActionTaken: {ActionTaken} RiskEventSource: {RiskEventSource} RiskEventType: {RiskEventType} RiskEventCategory: {RiskEventCategory} RiskEventStatus: {RiskEventStatus} RiskEventStartTime: {RiskEventStartTime} RiskEventEndTime: {RiskEventEndTime} RiskEventPublishedTime: {RiskEventPublishedTime}"
+}
