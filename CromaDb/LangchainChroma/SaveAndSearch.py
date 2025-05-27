@@ -61,11 +61,11 @@ for skip in range(0, total_docs, batch_size):
     db.add_documents(documents)
 print("\nStatus: Loading complete.")
 
-query = "Find records where AlertTitle is Security!Shooting: Shooting and RiskEventType"
-results = db.similarity_search(query, k=2)  # k specifies the number of results to return
-#display the results line by line
-for i, doc in enumerate(results):
-    print(f"Document {i+1}: {doc.page_content}")
-    #add new line for every document
-    print("\n")
+# query = "Find records where AlertTitle is Security!Shooting: Shooting and RiskEventType"
+# results = db.similarity_search(query, k=2)  # k specifies the number of results to return
+# #display the results line by line
+# for i, doc in enumerate(results):
+#     print(f"Document {i+1}: {doc.page_content}")
+#     #add new line for every document
+#     print("\n")
 input("Press Enter to continue...")
