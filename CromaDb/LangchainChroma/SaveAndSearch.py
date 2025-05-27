@@ -4,34 +4,42 @@ from langchain.schema import Document
 from langchain.embeddings import SentenceTransformerEmbeddings
 import json
 import os
+import re
+from uuid import UUID
 
-collectionName = "AuditLog"
+collectionName = "RiskEvent"
 client = MongoClient("mongodb://localhost:27017/")
 db = client["VJournal"]
 collection = db[collectionName]
 
-# Use the file from the current working directory
-template_file = os.path.join(os.getcwd(), "RiskEventTemplate.json")
-if not os.path.exists(template_file):
-    print(f"File not found: {template_file}")
-with open(template_file, "r") as file:
+# Load the template from ChromaTemplate.json
+with open("ChromaTemplate.json", "r") as file:
     template = json.load(file)
 
+# Find the RiskEventTemplate object
+risk_event_template = None
+for obj in template:
+    if "RiskEventTemplate" in obj:
+        risk_event_template = obj["RiskEventTemplate"]
+        break
+
 # Transform MongoDB documents into the required format
-documents = [
-    Document(
-        page_content=(
-            template["text"].format(
-                **{key: doc.get(key, "") for key in template["text"].split("{") if "}" in key}
-            ) + (
-                " ".join(
-                    f"{prop}: {value}" for prop, value in doc.get("ExtendedPropertiesAccess", {}).items()
-                ) if "ExtendedPropertiesAccess" in doc else ""
-            )
-        )
-    )
-    for doc in collection.find().limit(10)
-]
+pattern = re.compile(r"{(.*?)}")
+documents = []
+
+for doc in collection.find().limit(1):
+
+    keys = pattern.findall(risk_event_template)
+    page_content = risk_event_template
+    for key in keys:
+        page_content = page_content.replace(f"{{{key}}}", str(doc.get(key, "")))
+    # If ExtendedPropertiesAccess exists and is a dict, append its properties
+    if "ExtendedPropertiesAccess" in doc and isinstance(doc["ExtendedPropertiesAccess"], dict):
+        ext_props = doc["ExtendedPropertiesAccess"]
+        ext_props_str = " ".join(f"{k}: {v}" for k, v in ext_props.items())
+        page_content += " " + ext_props_str
+    documents.append(Document(page_content=page_content))
+
 
 # Load a local pre-trained model for embeddings
 embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") 
