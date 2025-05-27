@@ -33,7 +33,7 @@ embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2"
 
 # 2. Create a LangChain Chroma wrapper that points to the existing collection
 # This directly connects to your existing ChromaDB collection
-collectionName = "AuditLog"
+collectionName = "RiskEvent"
 vectorstore = Chroma(
     persist_directory=persist_directory,
     embedding_function=embedding_function,

@@ -1,22 +1,27 @@
 import json
 import re
 
-# Load the template from template.json
-template_file = "RiskEventTemplate.json"
-with open(template_file, "r") as file:
-    template = json.load(file)
+# Load the template from ChromaTemplate.json
+with open("ChromaTemplate.json", "r") as file:
+    templates = json.load(file)
+
+# Find the RiskEventTemplate object
+risk_event_template = None
+for obj in templates:
+    if "RiskEventTemplate" in obj:
+        risk_event_template = obj["RiskEventTemplate"]
+        break
 
 # Load the audit data from auditData.json
-audit_data_file = "auditData.json"
-with open(audit_data_file, "r") as file:
+with open("auditData.json", "r") as file:
     audit_data = json.load(file)
 
 # Populate the template with values from auditData.json
 populated_texts = []
 pattern = re.compile(r"{(.*?)}")
 for record in audit_data:
-    keys = pattern.findall(template["text"])
-    populated_text = template["text"]
+    keys = pattern.findall(risk_event_template)
+    populated_text = risk_event_template
     for key in keys:
         populated_text = populated_text.replace(f"{{{key}}}", str(record.get(key, "")))
     # If ExtendedPropertiesAccess exists and is a dict, append its properties
