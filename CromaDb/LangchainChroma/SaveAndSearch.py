@@ -29,9 +29,21 @@ batch_size = 100  # Adjust as needed
 
 # Load a local pre-trained model for embeddings
 embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-
+persist_directory = "C:\\ChromaDbLangchain"
+db = Chroma(
+    persist_directory=persist_directory,
+    embedding_function=embedding_model,
+    collection_name=collectionName
+)
+print("Status: Loading data from MongoDB and processing batches...")
 total_docs = collection.count_documents({})
 for skip in range(0, total_docs, batch_size):
+    percent = int(((skip + batch_size) / total_docs) * 100) if total_docs else 100
+    percent = min(percent, 100)
+    bar_length = 40
+    filled_length = int(bar_length * percent // 100)
+    bar = '=' * filled_length + '-' * (bar_length - filled_length)
+    print(f"\rProcessing: |{bar}| {percent}%", end="")
     documents = []
     batch_docs = collection.find().skip(skip).limit(batch_size)
     for doc in batch_docs:
@@ -46,8 +58,8 @@ for skip in range(0, total_docs, batch_size):
             page_content += " " + ext_props_str
         documents.append(Document(page_content=page_content))
     # Embed the document chunks and store them in ChromaDB for this batch
-    db = Chroma.from_documents(documents, collection_name=collectionName, embedding=embedding_model, persist_directory="C:\ChromaDbLangchain")
-
+    db.add_documents(documents)
+print("\nStatus: Loading complete.")
 
 query = "Find records where AlertTitle is Security!Shooting: Shooting and RiskEventType"
 results = db.similarity_search(query, k=2)  # k specifies the number of results to return
