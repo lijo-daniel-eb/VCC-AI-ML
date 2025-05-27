@@ -25,27 +25,28 @@ for obj in template:
 
 # Transform MongoDB documents into the required format
 pattern = re.compile(r"{(.*?)}")
-documents = []
-
-for doc in collection.find().limit(1):
-
-    keys = pattern.findall(risk_event_template)
-    page_content = risk_event_template
-    for key in keys:
-        page_content = page_content.replace(f"{{{key}}}", str(doc.get(key, "")))
-    # If ExtendedPropertiesAccess exists and is a dict, append its properties
-    if "ExtendedPropertiesAccess" in doc and isinstance(doc["ExtendedPropertiesAccess"], dict):
-        ext_props = doc["ExtendedPropertiesAccess"]
-        ext_props_str = " ".join(f"{k}: {v}" for k, v in ext_props.items())
-        page_content += " " + ext_props_str
-    documents.append(Document(page_content=page_content))
-
+batch_size = 100  # Adjust as needed
 
 # Load a local pre-trained model for embeddings
-embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2") 
+embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# Embed the document chunks and store them in ChromaDB
-db = Chroma.from_documents(documents,collection_name=collectionName, embedding=embedding_model, persist_directory="C:\ChromaDbLangchain")
+total_docs = collection.count_documents({})
+for skip in range(0, total_docs, batch_size):
+    documents = []
+    batch_docs = collection.find().skip(skip).limit(batch_size)
+    for doc in batch_docs:
+        keys = pattern.findall(risk_event_template)
+        page_content = risk_event_template
+        for key in keys:
+            page_content = page_content.replace(f"{{{key}}}", str(doc.get(key, "")))
+        # If ExtendedPropertiesAccess exists and is a dict, append its properties
+        if "ExtendedPropertiesAccess" in doc and isinstance(doc["ExtendedPropertiesAccess"], dict):
+            ext_props = doc["ExtendedPropertiesAccess"]
+            ext_props_str = " ".join(f"{k}: {v}" for k, v in ext_props.items())
+            page_content += " " + ext_props_str
+        documents.append(Document(page_content=page_content))
+    # Embed the document chunks and store them in ChromaDB for this batch
+    db = Chroma.from_documents(documents, collection_name=collectionName, embedding=embedding_model, persist_directory="C:\ChromaDbLangchain")
 
 
 query = "Find records where AlertTitle is Security!Shooting: Shooting and RiskEventType"
