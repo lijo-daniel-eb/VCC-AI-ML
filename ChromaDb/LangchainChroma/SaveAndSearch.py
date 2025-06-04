@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from langchain_chroma import Chroma
 from langchain.schema import Document
-from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 import json
 import os
 import re
@@ -28,7 +28,7 @@ pattern = re.compile(r"{(.*?)}")
 batch_size = 100  # Adjust as needed
 
 # Load a local pre-trained model for embeddings
-embedding_model = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 persist_directory = "C:\\ChromaDbLangchain"
 db = Chroma(
     persist_directory=persist_directory,
