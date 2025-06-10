@@ -3,14 +3,16 @@ from huggingface_hub import snapshot_download
 from langchain_chroma import Chroma
 from langchain_community.llms import Ollama
 from langchain.chains.retrieval_qa.base import RetrievalQA
-from langchain.prompts import PromptTemplate
-from langchain.embeddings import SentenceTransformerEmbeddings
-from langchain.vectorstores import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama import OllamaLLM
 # Define model info
-model_name = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
-local_model_path = "C:\\LLM_Model\\all-MiniLM-L6-v2"  # Change this to your preferred local path
+embedding_model_name = "all-MiniLM-L6-v2"
+embedding_function = HuggingFaceEmbeddings(model_name=embedding_model_name)
+local_model_path = "C:\\Models\\all-MiniLM-L6-v2"  # Change this to your preferred local path
 
 # Check if model exists locally, if not download it
+# (Optional: If you want to ensure the model is downloaded, you can use huggingface_hub, but HuggingFaceEmbeddings will handle it if not present)
+
 def ensure_model_is_local(model_name, local_path):
     if not os.path.exists(local_path) or len(os.listdir(local_path)) == 0:
         print(f"Model not found locally. Downloading {model_name} to {local_path}...")
@@ -23,13 +25,12 @@ def ensure_model_is_local(model_name, local_path):
         print(f"Using cached model at {local_path}")
     return local_path
 
-# Ensure model is available locally
-local_model_path = ensure_model_is_local(model_name, local_model_path)
+# Ensure model is available locally (optional, for explicit download)
+local_model_path = ensure_model_is_local(embedding_model_name, local_model_path)
 
 # 1. Initialize the embedding model. Use the local model path for embeddings
 # Load the Chroma wrapper class
 persist_directory = "C:\\ChromaDbLangchain"
-embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
 # 2. Create a LangChain Chroma wrapper that points to the existing collection
 # This directly connects to your existing ChromaDB collection
@@ -42,7 +43,7 @@ vectorstore = Chroma(
 
 # 3. Initialize Ollama LLM
 # Make sure Ollama is running locally with your chosen model
-ollama_llm = Ollama(
+ollama_llm = OllamaLLM(
     model="llama3",  # Or any model you have in Ollama: mistral, llava, gemma, etc.
     temperature=0.1  # Lower temperature for more factual responses
 )
@@ -73,9 +74,8 @@ while True:
         print("Exiting the application.")
         break
 
-    result = qa_chain_mmr({"query": query})
-
-print(f"Answer: {result['result']}")
+    result = qa_chain_mmr.invoke({"query": query})
+    print(f"Answer: {result['result']}")
 
 
 
