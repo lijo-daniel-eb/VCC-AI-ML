@@ -1,14 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.decomposition import PCA
-from langchain.embeddings import SentenceTransformerEmbeddings
+from langchain_huggingface import HuggingFaceEmbeddings
 from langchain.vectorstores import Chroma
 
 def visualize_embeddings_2d():
     # Initialize ChromaDB client
-    collectionName = "AuditLog"
+    collectionName = "RiskEvent"
     persist_directory = "C:\\ChromaDbLangchain"
-    embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
+    embedding_function = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
 
     chroma_client = Chroma(
         persist_directory=persist_directory,

@@ -2,10 +2,9 @@ from pymongo import MongoClient
 from langchain_chroma import Chroma
 from langchain.schema import Document
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores.utils import filter_complex_metadata
 import json
-import os
 import re
-from uuid import UUID
 import datetime
 from datetime import timezone, timedelta
 
@@ -31,7 +30,7 @@ batch_size = 100  # Adjust as needed
 
 # Load a local pre-trained model for embeddings
 embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-persist_directory = "C:\\ChromaDbLangchain"
+persist_directory = "C:\\ChromaDb_FieldsOnly"
 db = Chroma(
     persist_directory=persist_directory,
     embedding_function=embedding_model,
@@ -88,7 +87,22 @@ for skip in range(0, total_docs, batch_size):
             ext_props = doc["ExtendedPropertiesAccess"]
             ext_props_str = " ".join(f"{k}: {v}" for k, v in ext_props.items())
             page_content += " " + ext_props_str
-        documents.append(Document(page_content=page_content))
+        # Add metadata to Document (exclude keys with 'date' in their name, case-insensitive)
+        metadata = {
+            k: v for k, v in doc.items()
+            if (
+                k not in keys and
+                'date' not in k.lower() and
+                k != 'ExtendedPropertiesAccess' and
+                v not in (None, "")
+            )
+        }
+        # Add all properties from ExtendedPropertiesAccess if present
+        if "ExtendedPropertiesAccess" in doc and isinstance(doc["ExtendedPropertiesAccess"], dict):
+            metadata.update({k: v for k, v in doc["ExtendedPropertiesAccess"].items() if v not in (None, "")})
+        # Filter out complex metadata (expects a list of Document objects)
+        filtered_docs = filter_complex_metadata([Document(page_content=page_content, metadata=metadata)])
+        documents.extend(filtered_docs)
     # Embed the document chunks and store them in ChromaDB for this batch
     db.add_documents(documents)
 print("\nStatus: Loading complete.")
@@ -97,7 +111,7 @@ print("\nStatus: Loading complete.")
 # results = db.similarity_search(query, k=2)  # k specifies the number of results to return
 # #display the results line by line
 # for i, doc in enumerate(results):
-#     print(f"Document {i+1}: {doc.page_content}")
+#     print(f"Document {i+1}: {getattr(doc, 'page_content', doc)}")
 #     #add new line for every document
 #     print("\n")
 input("Press Enter to continue...")

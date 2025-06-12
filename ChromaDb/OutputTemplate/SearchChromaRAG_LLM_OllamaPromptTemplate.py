@@ -33,7 +33,8 @@ embedding_function = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2"
 
 # 2. Create a LangChain Chroma wrapper that points to the existing collection
 # This directly connects to your existing ChromaDB collection
-collectionName = "AuditLog"
+
+collectionName = "RiskEvent"
 vectorstore = Chroma(
     persist_directory=persist_directory,
     embedding_function=embedding_function,
@@ -48,50 +49,64 @@ ollama_llm = Ollama(
 )
 
 
-# 7. Advanced retrieval with MMR for more diverse results
-mmr_retriever = vectorstore.as_retriever(
-    search_type="mmr",
-    search_kwargs={"k": 20, "fetch_k": 10, "lambda_mult": 0.7}
+# 4. Create a retriever from the vector store
+retriever = vectorstore.as_retriever(
+    search_type="similarity", 
+    search_kwargs={"k": 500}
 )
 
-qa_chain_mmr = RetrievalQA.from_chain_type(
+# 5. Create a RAG chain with the Ollama LLM
+qa_chain = RetrievalQA.from_chain_type(
+    llm=ollama_llm,
+    chain_type="stuff",  # Simple document compilation
+    retriever=retriever,
+    return_source_documents=True  # To see which documents were used
+)
+
+# 11. For better prompting with Ollama models, you might want to customize the prompt template
+from langchain.prompts import PromptTemplate
+
+# Create a custom prompt template specifically for RAG
+template = """
+You are a helpful AI assistant. Use the following pieces of context to answer the question at the end.
+If you don't know the answer based on the context, just say that you don't know, don't try to make up an answer.
+
+Context:
+{context}
+
+Question: {question}
+
+Answer:
+"""
+
+PROMPT = PromptTemplate(
+    template=template,
+    input_variables=["context", "question"]
+)
+
+# Ensure qa_chain_custom_prompt is initialized before the loop
+qa_chain_custom_prompt = RetrievalQA.from_chain_type(
     llm=ollama_llm,
     chain_type="stuff",
-    retriever=mmr_retriever,
-    return_source_documents=True
+    retriever=retriever,
+    return_source_documents=True,
+    chain_type_kwargs={"prompt": PROMPT}
 )
 
-# 8. Using metadata filters if your documents have metadata
-metadata_filter = {"category": "important"}
-filtered_retriever = vectorstore.as_retriever(
-    search_kwargs={"k": 20, "filter": metadata_filter}
-)
-
-# 10. Get all documents from the collection if needed
-# collection = vectorstore._collection
-# all_results = collection.get()
-# print(f"Total documents in collection: {len(all_results['documents'])}")
-
-# Add an option to use filtered_retriever in the query loop
+# Replace the static query with a user input loop
 while True:
     query = input("Enter your query (or type 'exit' to quit): ")
     if query.lower() == 'exit':
         print("Exiting the application.")
         break
 
-    # Ask the user if they want to apply metadata filters
-    use_filter = input("Do you want to apply metadata filters? (yes/no): ").strip().lower()
-    if use_filter == 'yes':
-        result = RetrievalQA.from_chain_type(
-            llm=ollama_llm,
-            chain_type="stuff",
-            retriever=filtered_retriever,
-            return_source_documents=True
-        )({"query": query})
-    else:
-        result = qa_chain_mmr({"query": query})
+    # Run the query through the RAG system
+    result_custom = qa_chain_custom_prompt({"query": query})
+    print(f"Answer with custom prompt: {result_custom['result']}")
 
-    print(f"Answer: {result['result']}")
-
-
-
+    # # Display source documents
+    # print("Source documents:")
+    # for i, doc in enumerate(result_custom['source_documents']):
+    #     print(f"Document {i+1}: {doc.page_content}")
+    #     print(f"Metadata: {doc.metadata}")
+    #     print("---")

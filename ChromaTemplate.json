@@ -1,8 +1,12 @@
 [
-    {
-    "RiskEventTemplate": "Title: {Title} StartTime: {StartTime} EndTime: {EndTime} CreatedTime: {CreatedTime} Location: {Location} Description: {Description} Source: {Source} SubSource: {SubSource} Category: {Category} PublicationTime: {PublicationTime}"
-    },   
+       
     {
     "AudiLogTemplate": "AlertCreatedTime: {AlertCreatedTime} AlertTitle: {AlertTitle} ActionTaken: {ActionTaken} RiskEventSource: {RiskEventSource} RiskEventType: {RiskEventType} RiskEventCategory: {RiskEventCategory} RiskEventStatus: {RiskEventStatus} RiskEventStartTime: {RiskEventStartTime} RiskEventEndTime: {RiskEventEndTime} RiskEventPublishedTime: {RiskEventPublishedTime}"
     }
+    ,{
+    "RiskEventTemplatexx": "A risk event with External ID {ExternalID} has been identified, categorized as a {Type} ,under the title {Title}. This event is set to begin at {StartTime - date} and is expected to end by {EndTime - date}. The incident location is defined as {Location}. The event was first reported on {CreatedTime - date} and last updated on {UpdatedTime - date}. Description: {Description} The situation is classified under {Category} / {Subcategory} and holds a severity level of {Severity}. The current status is {Status}. Location metadata can be analyzed using the query geometry {QueryGeometry} and the display location {DisplayLocation}. Related media is available at {ImageUrl}, and further details may be accessible via {Url}. For communication or escalation, contact {PhoneNumber} or {EmailAddress}. This event was officially published at {PublicationTime - date}, sourced from {Source}, with additional context from {SubSource}. The estimated magnitude is {Magnitude}. The additional contextual attributes will be available from {ExtendedPropertiesAccess}"
+    },{
+    "RiskEventTemplate": "ExternalID: {ExternalID}; Type: {Type}; Title: {Title}; StartTime: {StartTime - date}; Location: {Location}; Description: {Description}; Source: {Source}; SubSource: {SubSource}; Category: {Category}; PublicationTime: {PublicationTime - date}; Subcategory: {Subcategory}; Severity:{Severity} ;Status: {Status} ;DisplayLocation: {DisplayLocation}; PhoneNumber: {PhoneNumber}; EmailAddress: {EmailAddress}; Magnitude: {Magnitude}; {ExtendedPropertiesAccess}"
+    }
+
 ]

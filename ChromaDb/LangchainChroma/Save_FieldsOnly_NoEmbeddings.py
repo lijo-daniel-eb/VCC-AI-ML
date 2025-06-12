@@ -30,11 +30,10 @@ pattern = re.compile(r"{(.*?)}")
 batch_size = 100  # Adjust as needed
 
 # Load a local pre-trained model for embeddings
-embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-persist_directory = "C:\\ChromaDbLangchain"
+#embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+persist_directory = "ChromaDbEmbeddings.py"
 db = Chroma(
     persist_directory=persist_directory,
-    embedding_function=embedding_model,
     collection_name=collectionName
 )
 print("Status: Loading data from MongoDB and processing batches...")
