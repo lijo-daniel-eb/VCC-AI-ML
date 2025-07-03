@@ -2,10 +2,9 @@ from pymongo import MongoClient
 from langchain_chroma import Chroma
 from langchain.schema import Document
 from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores.utils import filter_complex_metadata
 import json
-import os
 import re
-from uuid import UUID
 import datetime
 from datetime import timezone, timedelta
 
@@ -30,10 +29,11 @@ pattern = re.compile(r"{(.*?)}")
 batch_size = 100  # Adjust as needed
 
 # Load a local pre-trained model for embeddings
-#embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
-persist_directory = "ChromaDbEmbeddings.py"
+embedding_model = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+persist_directory = "C:\\FieldsOnlyAndMetadata"
 db = Chroma(
     persist_directory=persist_directory,
+    embedding_function=embedding_model,
     collection_name=collectionName
 )
 print("Status: Loading data from MongoDB and processing batches...")
@@ -56,14 +56,18 @@ def ticks_to_date(tick_array):
         print(f"Exception converting ticks for value '{tick_array}': {e}")
         return str(tick_array)
 
-for skip in range(0, total_docs, batch_size):
-    percent = int(((skip + batch_size) / total_docs) * 100) if total_docs else 100
+for skip in range(0, total_docs + 1, batch_size):
+    # Always print progress bar, including at 0
+    percent = int((skip / total_docs) * 100) if total_docs else 100
     percent = min(percent, 100)
     bar_length = 40
     filled_length = int(bar_length * percent // 100)
     bar = '=' * filled_length + '-' * (bar_length - filled_length)
     print(f"\rProcessing: |{bar}| {percent}%", end="")
+    if skip == total_docs:
+        break
     documents = []
+    ids = []  # Collect document ids for ChromaDB
     batch_docs = collection.find().skip(skip).limit(batch_size)
     for doc in batch_docs:
         keys = pattern.findall(risk_event_template)
@@ -87,16 +91,27 @@ for skip in range(0, total_docs, batch_size):
             ext_props = doc["ExtendedPropertiesAccess"]
             ext_props_str = " ".join(f"{k}: {v}" for k, v in ext_props.items())
             page_content += " " + ext_props_str
-        documents.append(Document(page_content=page_content))
-    # Embed the document chunks and store them in ChromaDB for this batch
-    db.add_documents(documents)
+        # Add metadata to Document (exclude keys with 'date' in their name, case-insensitive)
+        metadata = {
+            k: v for k, v in doc.items()
+            if (
+                'date' not in k.lower() and
+                k != 'ExtendedPropertiesAccess' and
+                v not in (None, "")
+            )
+        }
+        # Add all properties from ExtendedPropertiesAccess if present
+        if "ExtendedPropertiesAccess" in doc and isinstance(doc["ExtendedPropertiesAccess"], dict):
+            metadata.update({k: v for k, v in doc["ExtendedPropertiesAccess"].items() if v not in (None, "")})
+        # Add MongoDB _id as a string to metadata and to ids list
+        mongo_id = str(doc.get("_id", ""))
+        metadata["mongo_id"] = mongo_id
+        ids.append(mongo_id)
+        # Filter out complex metadata (expects a list of Document objects)
+        filtered_docs = filter_complex_metadata([Document(page_content=page_content, metadata=metadata)])
+        documents.extend(filtered_docs)
+    # Embed the document chunks and store them in ChromaDB for this batch, with ids
+    db.add_documents(documents, ids=ids)
 print("\nStatus: Loading complete.")
 
-# query = "Find records where AlertTitle is Security!Shooting: Shooting and RiskEventType"
-# results = db.similarity_search(query, k=2)  # k specifies the number of results to return
-# #display the results line by line
-# for i, doc in enumerate(results):
-#     print(f"Document {i+1}: {doc.page_content}")
-#     #add new line for every document
-#     print("\n")
 input("Press Enter to continue...")

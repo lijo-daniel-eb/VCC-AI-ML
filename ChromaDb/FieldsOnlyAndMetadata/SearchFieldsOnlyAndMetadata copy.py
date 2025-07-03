@@ -2,7 +2,6 @@ import os
 import json
 import re
 import subprocess
-import time
 from huggingface_hub import snapshot_download
 from langchain_chroma import Chroma
 from langchain.chains.retrieval_qa.base import RetrievalQA
@@ -33,11 +32,11 @@ print("Metadata Fields Available:", metadata_fields)
 
 # === Step 2: Embedding Model Setup ===
 collectionName = "RiskEvent"
-local_model_path = "C:/Models/all-MiniLM-L6-v2"
+local_model_path = "C:/Models/all-mpnet-base-v2"
 
 if not os.path.exists(local_model_path) or not any(f.endswith((".bin", ".safetensors", ".h5", ".msgpack")) for f in os.listdir(local_model_path)):
     print(f"Downloading embedding model to {local_model_path}...")
-    snapshot_download(repo_id="sentence-transformers/all-MiniLM-L6-v2", local_dir=local_model_path)
+    snapshot_download(repo_id="sentence-transformers/all-mpnet-base-v2", local_dir=local_model_path)
 else:
     print(f"Using cached embedding model at {local_model_path}")
 
@@ -175,54 +174,35 @@ def normalize_filter(filters):
         return filters
     return {"$and": [{k: v} for k, v in filters.items()]}
 
-user_queries_semantic = []
-user_queries_filtered = []
-
-def log_timing(label, start_time):
-    elapsed = time.time() - start_time
-    print(f"[Timing] {label}: {elapsed:.2f} seconds")
-
 while True:
     query = input("\nEnter your query (or type 'exit' to quit): ")
     if query.lower() == 'exit':
         print("Exiting.")
-        print("\nUser queries (filtered search):", user_queries_filtered)
-        print("User queries (semantic search):", user_queries_semantic)
         break
 
     filters = extract_metadata_filters_with_ops(query, metadata_fields)
 
     if filters and filters != "__FALLBACK_TO_SEMANTIC__":
-        user_queries_filtered.append(query)
         print(f"\nExtracted filters: {json.dumps(filters, indent=2)}")
         try:
             normalized_filters = normalize_filter(filters)
-            t0 = time.time()
             results = vectorstore.similarity_search(
                 query=query,
                 k=5,
                 filter=normalized_filters
             )
-            log_timing("Filtered similarity_search", t0)
             # If no results, fallback to semantic search
             if results:
-                t1 = time.time()
                 summaries = summarize_with_ollama(results, query)
-                log_timing("LLM summarization (filtered)", t1)
                 print("\nSummarized Results:")
                 for idx, summary in enumerate(summaries, 1):
                     print(f"\nResult {idx}:")
                     print(summary)
             else:
                 print("No documents matched these filters. Performing semantic search...")
-                user_queries_semantic.append(query)
                 try:
-                    t2 = time.time()
                     result = qa_chain.invoke({"query": query})
-                    log_timing("Semantic search invoke", t2)
-                    t3 = time.time()
                     summaries = summarize_with_ollama(result['source_documents'], query)
-                    log_timing("LLM summarization (semantic)", t3)
                     print("\nSummarized Results:")
                     for idx, summary in enumerate(summaries, 1):
                         print(f"\nResult {idx}:")
@@ -232,15 +212,10 @@ while True:
         except Exception as e:
             print(f"Error during similarity_search: {e}")
     else:
-        user_queries_semantic.append(query)
         print("No filters found or error extracting filters. Performing semantic search...")
         try:
-            t2 = time.time()
             result = qa_chain.invoke({"query": query})
-            log_timing("Semantic search invoke", t2)
-            t3 = time.time()
             summaries = summarize_with_ollama(result['source_documents'], query)
-            log_timing("LLM summarization (semantic)", t3)
             print("\nSummarized Results:")
             for idx, summary in enumerate(summaries, 1):
                 print(f"\nResult {idx}:")
